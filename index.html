@@ -3,164 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Seedling</title>
   <style>
     :root { --bg:#07140f; --ink:#f4fff4; --muted:#b7d4c4; --accent:#7dffb3; --line:rgba(255,255,255,.14); }
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html,body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,sans-serif; }
-    body { padding:12px 12px 110px; }
+    html, body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,sans-serif; overflow-x:hidden; }
+    body { padding: max(10px, env(safe-area-inset-top)) 12px 24px; }
     header { display:flex; justify-content:space-between; align-items:baseline; }
-    h1 { margin:0; font-size:1.2rem; }
-    header span { color:var(--muted); font-size:.75rem; }
-    .plant { position:relative; height:30vh; min-height:180px; max-height:230px; margin:8px 0; border:1px solid var(--line); border-radius:18px; background:#08150f; overflow:hidden; }
+    h1 { margin:0; font-size:1.15rem; }
+    header span { color:var(--muted); font-size:.72rem; }
+    .plant { position:relative; height:200px; margin:8px 0 10px; border:1px solid var(--line); border-radius:16px; background:#08150f; overflow:hidden; }
     #stage { width:100%; height:100%; display:block; }
     .meta { position:absolute; left:10px; bottom:8px; margin:0; font-size:.72rem; color:#e7ffe9; }
-    .fields { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    label { display:block; font-size:.68rem; color:var(--muted); text-transform:uppercase; margin-bottom:3px; }
-    input[type=text], input[type=date] { width:100%; font-size:16px; min-height:42px; border-radius:12px; border:1px solid var(--line); background:#0d241c; color:var(--ink); padding:8px 10px; }
-    .color-row { grid-column:1/-1; display:grid; grid-template-columns:1fr 110px; gap:8px; align-items:end; }
-    input[type=color] { width:100%; height:42px; border-radius:12px; border:1px solid var(--line); background:#0d241c; }
+    label { display:block; font-size:.65rem; color:var(--muted); text-transform:uppercase; margin:0 0 4px; }
+    input[type=text], input[type=date] { width:100%; max-width:100%; font-size:16px; min-height:42px; border-radius:12px; border:1px solid var(--line); background:#0d241c; color:var(--ink); padding:8px 8px; }
+    .stack { display:flex; flex-direction:column; gap:8px; }
+    .swatch-wrap { display:flex; gap:8px; align-items:center; }
+    #swatch { width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:#7dffb3; }
+    .color-hit { position:relative; width:42px; height:42px; flex:none; }
+    input[type=color] { position:absolute; inset:0; opacity:0; width:42px; height:42px; }
     .slider-head { display:flex; justify-content:space-between; color:var(--muted); font-size:.72rem; margin-top:8px; }
     .slider-head b { color:var(--accent); }
-    input[type=range] { width:100%; height:34px; accent-color:var(--accent); }
-    .actions { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px; margin:10px 0; }
-    button { min-height:46px; border:0; border-radius:999px; font-weight:700; font-size:.95rem; color:var(--ink); }
+    input[type=range] { width:100%; height:32px; accent-color:var(--accent); margin:0; }
+    .actions { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px; margin:12px 0 8px; }
+    button { min-height:46px; border:0; border-radius:999px; font-weight:700; font-size:.92rem; color:var(--ink); }
     .primary { background:var(--accent); color:#062315; }
     .ghost { background:#123328; border:1px solid var(--line); }
-    details { color:var(--muted); font-size:.8rem; }
-    .peek { font-family:ui-monospace,Menlo,monospace; font-size:.72rem; background:#0a1a14; color:#d6ffe8; border-radius:10px; padding:8px; white-space:pre-wrap; }
+    details { color:var(--muted); font-size:.78rem; }
+    .peek { font-family:ui-monospace,Menlo,monospace; font-size:.7rem; background:#0a1a14; color:#d6ffe8; border-radius:10px; padding:8px; white-space:pre-wrap; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Seedling</h1>
-    <span>Your math plant</span>
-  </header>
-
-  <section class="plant">
-    <svg id="stage" viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet">
-      <path id="trunk" d="M150 205 L148 150 L120 110 M148 150 L180 105 M148 150 L150 70 L130 40 M150 70 L175 38" fill="none" stroke="#7dffb3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <header><h1>Seedling</h1><span>Your math plant</span></header>
+  <section class="plant" id="plantBox">
+    <svg id="stage" viewBox="0 0 300 220" preserveAspectRatio="xMidYMid meet">
+      <path id="trunk" d="M150 205 L150 70" fill="none" stroke="#7dffb3" stroke-width="2.4" stroke-linecap="round"/>
     </svg>
     <p class="meta" id="meta">Tap Grow</p>
   </section>
-
-  <div class="fields">
+  <div class="stack">
+    <div><label for="name">Name</label><input id="name" type="text" maxlength="40" value="Luisa" /></div>
+    <div><label for="bday">Birthday</label><input id="bday" type="date" value="2014-06-12" /></div>
     <div>
-      <label for="name">Name</label>
-      <input id="name" type="text" maxlength="40" value="Luisa" />
-    </div>
-    <div>
-      <label for="bday">Birthday</label>
-      <input id="bday" type="date" value="2014-06-12" />
-    </div>
-    <div class="color-row">
-      <div>
-        <label for="color">Leaf color</label>
-        <input id="color" type="color" value="#7dffb3" />
+      <label>Leaf color</label>
+      <div class="swatch-wrap">
+        <div class="color-hit"><div id="swatch"></div><input id="color" type="color" value="#7dffb3" /></div>
+        <button class="ghost" type="button" id="randomColor" style="flex:1">Surprise</button>
       </div>
-      <button class="ghost" type="button" id="randomColor">Surprise</button>
     </div>
   </div>
-
   <div class="slider-head">Generations <b id="genVal">5</b></div>
   <input id="gen" type="range" min="3" max="6" value="5" />
   <div class="slider-head">Spread <b id="spreadVal">24°</b></div>
   <input id="spread" type="range" min="12" max="34" value="24" />
-
   <div class="actions">
     <button class="primary" type="button" id="grow">Grow</button>
     <button class="ghost" type="button" id="nextday">New day</button>
     <button class="ghost" type="button" id="save">Save</button>
   </div>
-
-  <details open>
-    <summary>See the math rule</summary>
-    <div class="peek" id="peek">start: F
-F → FF-[-F+F+F]+[+F-F-F]
-Each F is one branch. The rule repeats.</div>
-  </details>
-
+  <details><summary>See the math rule</summary><div class="peek" id="peek">start: F\nF → F[+F]F[-F][F]</div></details>
 <script>
 (function(){
-  var day=0;
+  var day=0, family=0, colorHex="#7dffb3";
   function $(id){ return document.getElementById(id); }
   function hash(s){ var h=2166136261,i; for(i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
   function rng(seed){ var a=seed; return function(){ var t=(a+=0x6d2b79f5); t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
-  function expand(axiom,rules,gens){
-    var s=axiom,i,j,n,ch;
-    for(i=0;i<gens;i++){
-      n="";
-      for(j=0;j<s.length;j++){ ch=s.charAt(j); n+=rules[ch]||ch; }
-      s=n; if(s.length>20000) break;
-    }
-    return s;
-  }
-  var SY=[
-    {name:"bush",axiom:"F",rules:{F:"FF-[-F+F+F]+[+F-F-F]"}},
-    {name:"tree",axiom:"X",rules:{X:"F[+X][-X]FX",F:"FF"}},
-    {name:"fern",axiom:"X",rules:{X:"F+[[X]-X]-F[-FX]+X",F:"FF"}},
-    {name:"shrub",axiom:"F",rules:{F:"F[+F]F[-F][F]"}}
-  ];
-  function turtle(str,ang){
-    var segs=[],stack=[],x=0,y=0,a=-Math.PI/2,step=10,rad=ang*Math.PI/180,i,ch,nx,ny,p;
-    for(i=0;i<str.length;i++){
-      ch=str.charAt(i);
-      if(ch==="F"){ nx=x+Math.cos(a)*step; ny=y+Math.sin(a)*step; segs.push([x,y,nx,ny]); x=nx; y=ny; }
-      else if(ch==="+") a+=rad;
-      else if(ch==="-") a-=rad;
-      else if(ch==="[") stack.push([x,y,a]);
-      else if(ch==="]"){ p=stack.pop(); if(p){ x=p[0]; y=p[1]; a=p[2]; } }
-    }
-    return segs;
-  }
-  function fit(segs){
-    var i,s,minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
-    for(i=0;i<segs.length;i++){ s=segs[i]; minX=Math.min(minX,s[0],s[2]); minY=Math.min(minY,s[1],s[3]); maxX=Math.max(maxX,s[0],s[2]); maxY=Math.max(maxY,s[1],s[3]); }
-    var bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY);
-    var sc=Math.min(268/bw,188/bh), ox=(300-bw*sc)/2-minX*sc, oy=(220-bh*sc)/2-minY*sc, out=[];
-    for(i=0;i<segs.length;i++){ s=segs[i]; out.push([s[0]*sc+ox,s[1]*sc+oy,s[2]*sc+ox,s[3]*sc+oy]); }
-    return out;
-  }
-  function grow(){
-    var name=($("name").value||"Friend").replace(/^\s+|\s+$/g,"");
-    var bday=$("bday").value||"2014-01-01";
-    var gens=parseInt($("gen").value,10)||5;
-    var spread=parseInt($("spread").value,10)||24;
-    var color=$("color").value||"#7dffb3";
-    var r=rng(hash(name.toLowerCase()+"|"+bday+"|"+day));
-    var sys=SY[Math.floor(r()*SY.length)];
-    var angle=spread+(r()-0.5)*4;
-    var segs=fit(turtle(expand(sys.axiom,sys.rules,gens),angle));
-    var d="",i;
-    for(i=0;i<segs.length;i++) d+="M"+segs[i][0].toFixed(1)+" "+segs[i][1].toFixed(1)+"L"+segs[i][2].toFixed(1)+" "+segs[i][3].toFixed(1);
-    $("trunk").setAttribute("d", d||"M150 205 L150 40");
-    $("trunk").setAttribute("stroke", color);
-    $("meta").textContent=name+"'s "+sys.name+" · day "+(day+1);
-    var rules="",k;
-    for(k in sys.rules) rules+=k+" → "+sys.rules[k]+"\n";
-    $("peek").textContent="start: "+sys.axiom+"\n"+rules+"angle ≈ "+angle.toFixed(1)+"°\nrepeat "+gens+" times\nEach F is one branch.";
-  }
+  function expand(axiom,rules,gens){ var s=axiom,i,j,n,ch; for(i=0;i<gens;i++){ n=""; for(j=0;j<s.length;j++){ ch=s.charAt(j); n+=rules[ch]||ch; } s=n; if(s.length>20000) break; } return s; }
+  var SY=[{name:"bush",axiom:"F",rules:{F:"FF-[-F+F+F]+[+F-F-F]"}},{name:"tree",axiom:"X",rules:{X:"F[+X][-X]FX",F:"FF"}},{name:"fern",axiom:"X",rules:{X:"F+[[X]-X]-F[-FX]+X",F:"FF"}},{name:"shrub",axiom:"F",rules:{F:"F[+F]F[-F][F]"}}];
+  function turtle(str,ang){ var segs=[],stack=[],x=0,y=0,a=-Math.PI/2,step=10,rad=ang*Math.PI/180,i,ch,nx,ny,p; for(i=0;i<str.length;i++){ ch=str.charAt(i); if(ch==="F"){ nx=x+Math.cos(a)*step; ny=y+Math.sin(a)*step; segs.push([x,y,nx,ny]); x=nx; y=ny; } else if(ch==="+") a+=rad; else if(ch==="-") a-=rad; else if(ch==="[") stack.push([x,y,a]); else if(ch==="]"){ p=stack.pop(); if(p){ x=p[0]; y=p[1]; a=p[2]; } } } return segs; }
+  function fit(segs){ var i,s,minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9; for(i=0;i<segs.length;i++){ s=segs[i]; minX=Math.min(minX,s[0],s[2]); minY=Math.min(minY,s[1],s[3]); maxX=Math.max(maxX,s[0],s[2]); maxY=Math.max(maxY,s[1],s[3]); } var bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY), sc=Math.min(268/bw,188/bh), ox=(300-bw*sc)/2-minX*sc, oy=(220-bh*sc)/2-minY*sc, out=[]; for(i=0;i<segs.length;i++){ s=segs[i]; out.push([s[0]*sc+ox,s[1]*sc+oy,s[2]*sc+ox,s[3]*sc+oy]); } return out; }
+  function hslToHex(h,s,l){ s/=100; l/=100; var k=function(n){ return (n+h/30)%12; }; var a=s*Math.min(l,1-l); var f=function(n){ return l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1))); }; var to=function(x){ var v=Math.round(255*x).toString(16); return v.length<2?"0"+v:v; }; return "#"+to(f(0))+to(f(8))+to(f(4)); }
+  function setColor(hex){ colorHex=hex; $("color").value=hex; $("swatch").style.background=hex; }
+  function grow(){ var name=($("name").value||"Friend").replace(/^\\s+|\\s+$/g,""); var bday=$("bday").value||"2014-01-01"; var gens=parseInt($("gen").value,10)||5; var spread=parseInt($("spread").value,10)||24; var r=rng(hash(name.toLowerCase()+"|"+bday+"|"+day+"|"+family)); var sys=SY[family%SY.length]; var angle=spread+(r()-0.5)*8+(day%5)*2; var segs=fit(turtle(expand(sys.axiom,sys.rules,gens),angle)); var d="",i; for(i=0;i<segs.length;i++) d+="M"+segs[i][0].toFixed(1)+" "+segs[i][1].toFixed(1)+"L"+segs[i][2].toFixed(1)+" "+segs[i][3].toFixed(1); $("trunk").setAttribute("d", d||"M150 205 L150 40"); $("trunk").setAttribute("stroke", colorHex); $("meta").textContent=name+"'s "+sys.name+" · day "+(day+1); var rules="",k; for(k in sys.rules) rules+=k+" → "+sys.rules[k]+"\\n"; $("peek").textContent="start: "+sys.axiom+"\\n"+rules+"angle ≈ "+angle.toFixed(1)+"°\\nrepeat "+gens+" times"; window.scrollTo(0,0); }
+  function blurBtn(el){ if(el&&el.blur) el.blur(); }
   $("gen").oninput=function(){ $("genVal").textContent=$("gen").value; };
   $("spread").oninput=function(){ $("spreadVal").textContent=$("spread").value+"°"; };
-  $("grow").onclick=function(){ day=0; grow(); };
-  $("nextday").onclick=function(){ day+=1; grow(); };
-  $("randomColor").onclick=function(){
-    var h=Math.floor(Math.random()*360);
-    $("color").value="#7dffb3";
-    day=0; grow();
-    $("trunk").setAttribute("stroke","hsl("+h+",70%,58%)");
-  };
-  $("save").onclick=function(){
-    var blob=new Blob([$("stage").outerHTML],{type:"image/svg+xml"});
-    var a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="seedling.svg";
-    a.click();
-  };
-  $("name").onchange=$("bday").onchange=$("color").onchange=function(){ day=0; grow(); };
-  $("gen").onchange=$("spread").onchange=grow;
-  grow();
+  $("gen").onchange=$("spread").onchange=function(){ grow(); };
+  $("grow").onclick=function(){ day=0; family=0; blurBtn(this); grow(); };
+  $("nextday").onclick=function(){ day+=1; family=(family+1)%SY.length; blurBtn(this); grow(); };
+  $("randomColor").onclick=function(){ setColor(hslToHex(Math.floor(Math.random()*360),72,58)); blurBtn(this); grow(); };
+  $("color").oninput=function(){ setColor($("color").value); grow(); };
+  $("save").onclick=function(){ var blob=new Blob([$("stage").outerHTML],{type:"image/svg+xml"}); var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="seedling.svg"; a.click(); };
+  $("name").onchange=$("bday").onchange=function(){ day=0; family=0; grow(); };
+  setColor("#7dffb3"); grow();
 })();
 </script>
 </body>
